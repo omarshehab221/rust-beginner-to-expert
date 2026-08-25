@@ -17,21 +17,6 @@ enum RangeParseError {
     InvalidBounds,
 }
 
-// impl std::fmt::Display for RangeParseError {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let message = match self {
-//             RangeParseError::InvalidFormat => "Please enter a valid range!",
-//             RangeParseError::InvalidStart => "Please enter a valid range start!",
-//             RangeParseError::InvalidEnd => "Please enter a valid range end!",
-//             RangeParseError::InvalidBounds => "The start of the range must be less than the end!",
-//         };
-
-//         write!(f, "{message}")
-//     }
-// }
-
-// impl Error for RangeParseError {}
-
 #[derive(Debug, thiserror::Error)]
 enum GuessParseError {
     #[error("please enter a valid number")]
@@ -40,19 +25,6 @@ enum GuessParseError {
     OutOfRange(u32, u32),
 }
 
-// impl std::fmt::Display for GuessParseError {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         let message = match self {
-//             GuessParseError::InvalidNumber => "Please enter a valid number!",
-//         };
-
-//         write!(f, "{message}")
-//     }
-// }
-
-// impl Error for GuessParseError {}
-
-// Production level implementation
 #[derive(Debug, thiserror::Error)]
 enum CliError {
     #[error("I/O error: {0}")]
@@ -67,52 +39,6 @@ enum CliError {
     #[error("game error: {0}")]
     Game(#[from] game::GuessError),
 }
-
-// Learning level implementation
-// #[derive(Debug)]
-// enum CliError {
-//     Io(io::Error),
-//     Range(RangeParseError),
-//     Guess(GuessParseError),
-// }
-
-// impl std::fmt::Display for CliError {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         match self {
-//             Self::Io(err) => write!(f, "I/O error: {err}"),
-//             Self::Range(err) => write!(f, "Range error: {err}"),
-//             Self::Guess(err) => write!(f, "Guess error: {err}"),
-//         }
-//     }
-// }
-
-// impl Error for CliError {
-//     fn source(&self) -> Option<&(dyn Error + 'static)> {
-//         match self {
-//             Self::Io(err) => Some(err),
-//             Self::Range(err) => Some(err),
-//             Self::Guess(err) => Some(err),
-//         }
-//     }
-// }
-
-// impl From<io::Error> for CliError {
-//     fn from(error: io::Error) -> Self {
-//         Self::Io(error)
-//     }
-// }
-
-// impl From<RangeParseError> for CliError {
-//     fn from(error: RangeParseError) -> Self {
-//         Self::Range(error)
-//     }
-// }
-
-// impl From<GuessParseError> for CliError {
-//     fn from(error: GuessParseError) -> Self {
-//         Self::Guess(error)
-//     }
-// }
 
 fn parse_range(input: &str) -> Result<Range<u32>, CliError> {
     let (start, end) = input

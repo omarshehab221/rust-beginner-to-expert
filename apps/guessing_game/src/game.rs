@@ -15,19 +15,6 @@ pub enum GuessOutcome {
     Lost { secret_number: u32 },
 }
 
-// #[derive(Debug, PartialEq, Eq)]
-// pub enum GameOutcome {
-//     Won,
-//     Lost { secret_number: u32 },
-// }
-
-// #[derive(Debug, PartialEq, Eq)]
-// pub struct GuessOutcome {
-//     pub result: GuessResult,
-//     // pub state: GameState,
-//     pub outcome: Option<GameOutcome>,
-// }
-
 #[derive(Debug, thiserror::Error)]
 pub enum GuessError {
     #[error("the game is already over")]

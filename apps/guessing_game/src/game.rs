@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, marker::PhantomData};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct InProgress;
@@ -12,7 +12,7 @@ pub struct Game<State> {
     secret_number: u32,
     max_attempts: u32,
     attempts: u32,
-    state: State,
+    state: PhantomData<State>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -41,7 +41,7 @@ impl Game<InProgress> {
             secret_number,
             max_attempts,
             attempts: 0,
-            state: InProgress,
+            state: PhantomData,
         }
     }
 
@@ -49,36 +49,24 @@ impl Game<InProgress> {
         self.attempts += 1;
 
         match guess.cmp(&self.secret_number) {
-            Ordering::Less => {
-                if self.is_over() {
-                    GuessOutcome::Lost(Game {
-                        secret_number: self.secret_number,
-                        max_attempts: self.max_attempts,
-                        attempts: self.attempts,
-                        state: Lost,
-                    })
-                } else {
-                    GuessOutcome::TooLow(self)
-                }
+            Ordering::Equal => {
+                return GuessOutcome::Won(Game {
+                    secret_number: self.secret_number,
+                    max_attempts: self.max_attempts,
+                    attempts: self.attempts,
+                    state: PhantomData,
+                });
             }
-            Ordering::Greater => {
-                if self.is_over() {
-                    GuessOutcome::Lost(Game {
-                        secret_number: self.secret_number,
-                        max_attempts: self.max_attempts,
-                        attempts: self.attempts,
-                        state: Lost,
-                    })
-                } else {
-                    GuessOutcome::TooHigh(self)
-                }
+            Ordering::Greater | Ordering::Less if self.is_over() => {
+                return GuessOutcome::Lost(Game {
+                    secret_number: self.secret_number,
+                    max_attempts: self.max_attempts,
+                    attempts: self.attempts,
+                    state: PhantomData,
+                });
             }
-            Ordering::Equal => GuessOutcome::Won(Game {
-                secret_number: self.secret_number,
-                max_attempts: self.max_attempts,
-                attempts: self.attempts,
-                state: Won,
-            }),
+            Ordering::Greater => GuessOutcome::TooHigh(self),
+            Ordering::Less => GuessOutcome::TooLow(self),
         }
     }
 

@@ -36,8 +36,8 @@ enum CliError {
     #[error("guess error: {0}")]
     Guess(#[from] GuessParseError),
 
-    #[error("game error: {0}")]
-    Game(#[from] game::GuessError),
+    // #[error("game error: {0}")]
+    // Game(#[from] game::GuessError),
 }
 
 fn parse_range(input: &str) -> Result<Range<u32>, CliError> {
@@ -114,7 +114,12 @@ fn read_guess(range: &Range<u32>) -> Result<u32, CliError> {
     }
 }
 
-fn play_game(mut game: Game, range: &Range<u32>) -> Result<(), CliError> {
+fn play_game(range: &Range<u32>) -> Result<(), CliError> {
+    let secret_number = rand::rng().random_range(range.clone());
+    // println!("The secret number is: {}", secret_number);
+
+    let mut game = Game::new(secret_number, 6);
+
     println!("You have {} attempts", game.max_attempts());
 
     loop {
@@ -122,21 +127,23 @@ fn play_game(mut game: Game, range: &Range<u32>) -> Result<(), CliError> {
 
         let guess = read_guess(range)?;
 
-        match game.guess(guess)? {
-            GameOutcome::TooLow => {
+        match game.guess(guess) {
+            GameOutcome::TooLow(next_game) => {
                 println!("\nToo small!!!");
+                game = next_game;
             }
 
-            GameOutcome::TooHigh => {
+            GameOutcome::TooHigh(next_game) => {
                 println!("\nToo big!!!");
+                game = next_game;
             }
 
-            GameOutcome::Won => {
+            GameOutcome::Won(_) => {
                 println!("\nYou guessed right!!!");
                 return Ok(());
             }
 
-            GameOutcome::Lost { secret_number } => {
+            GameOutcome::Lost(_) => {
                 println!("\nYou lose!");
                 println!("The number was: {secret_number}");
                 return Ok(());
@@ -150,14 +157,9 @@ fn init_game(range: &mut Option<Range<u32>>) -> Result<(), CliError> {
 
     let range = get_range(range)?;
 
-    let secret_number = rand::rng().random_range(range.clone());
-    // println!("The secret number is: {}", secret_number);
-
     println!("\nOK! Let's play!");
 
-    let game = Game::new(secret_number, 6);
-
-    play_game(game, &range)?;
+    play_game(&range)?;
 
     Ok(())
 }
